@@ -7,6 +7,30 @@ interface Result {
   target: number;
   average: number;
 }
+
+interface ExerciseValues {
+  target: number;
+  hours: number[];
+}
+
+const parseArguments = (args: string[]): ExerciseValues => {
+  if (args.length < 4) {
+    throw new Error('Not enough arguments');
+  }
+
+  const target = Number(args[2]);
+  const hours = args.slice(3).map(Number);
+
+  if (target <= 0 || !Number.isFinite(target)) {
+    throw new Error('Invalid target');
+  }
+
+  if (hours.some((hour) => !Number.isFinite(hour) || hour < 0)) {
+    throw new Error('Invalid exercise hours');
+  }
+  return { target, hours };
+};
+
 const calculateExercises = (hours: number[], target: number): Result => {
   const periodLength = hours.length;
   const trainingDays = hours.filter((hour) => hour > 0).length;
@@ -37,4 +61,11 @@ const calculateExercises = (hours: number[], target: number): Result => {
   };
 };
 
-console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2));
+try {
+  const { target, hours } = parseArguments(process.argv);
+  console.log(calculateExercises(hours, target));
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    console.log(error.message);
+  }
+}
